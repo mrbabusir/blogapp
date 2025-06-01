@@ -1,0 +1,40 @@
+
+
+
+user - super
+pass - 123654789sup
+phone - 9876543210
+email - yoyohoney@bee.com
+
+
+user - pravin
+pass - 12345678asdf
+phone - 9873216540
+email - shyamlal@bhailal.com
+
+user - msi
+pass - msi123654
+phone - 9865327410
+email - mr@msi.com
+
+user - roka
+pass - 987654321qwer
+phone - 9876453120
+email - dailal@hanuman.com
+
+user - magar
+pass - 321654asdf
+email. - rick@morty.com
+phone - 9873214560
+
+
+user - zillion
+pass - 123zillion123
+phone -1478523690
+email - zillion@million.com
+
+
+{
+    "email":"",
+    "password" : ""
+}

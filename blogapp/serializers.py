@@ -43,18 +43,25 @@ class CommentDetailSerializer(serializers.ModelSerializer):
 
 class BlogListSerializer(serializers.ModelSerializer):
    username = serializers.CharField(source = 'user.username', read_only = True)
-   category = serializers.PrimaryKeyRelatedField(many=True,queryset=Category.objects.all(),required=False) # blog detail ma category ko serializer lai include gareko
+   category = serializers.PrimaryKeyRelatedField(
+                                          many=True,#many to many realtion bhayera many = tru rakhknu parcha
+                                          queryset=Category.objects.all(), #category ko existing id haru lai verify gareko within the queryset
+                                          required=False) # blog detail ma category ko serializer lai include gareko
    class Meta:
       model = Blog
       fields = ['id','title','blogcontent','category','user','username','dateandtime']
       read_only_fields = ('id', 'user', 'dateandtime','username')
    def create(self, validated_data):
-        categories = validated_data.pop('category', []) ##create garda categories ma 
-        blog = Blog.objects.create(**validated_data)
+        categories = validated_data.pop('category', []) ##new blog post garda category ko error aayera ,, m2m relatiion lai handle garna category lai extract gareko ,
+        blog = Blog.objects.create(**validated_data) ##base create gareko
         if categories:
-            blog.category.set(categories)     
+            blog.category.set(categories)#blog post mad category ra blog set gareko ,.
         return blog
+# Override create() when you need special logic for new objects
 
+# Override update() when you need special logic for existing objects
+
+# Call save() in your views to handle both cases automatically
 
 class BlogDetailSerializer(serializers.ModelSerializer): #blog detail ko lagi serializer banako
    username = serializers.CharField(source='user.username', read_only=True)#field ma username dekhauna banako

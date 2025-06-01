@@ -13,15 +13,30 @@ from django.contrib.auth import get_user_model
 
 #create user views here
 
-class UserCreateView(CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRegistrationSerializer 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+class UserCreateView(CreateAPIView):  #new user registrationko starting view.
+    queryset = User.objects.all() #all user ko all objects lai queryset ma rakheko
+    serializer_class = UserRegistrationSerializer  ##serializing User registratio
+    def create(self, request, *args, **kwargs): 
+        serializer = self.get_serializer(data=request.data) ##fetchin serialized data with get_serialize
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        token, created = Token.objects.get_or_create(user=user)
+        token, created = Token.objects.get_or_create(user=user) ## registration process thik cha bhane token create garney
         return Response({"id": user.id, "username": user.username, "token": token.key}, status=status.HTTP_201_CREATED)
+class RegisteredUserview(APIView): #alreayd register usersko list
+    def get(self, request):
+        users = User.objects.all()
+        serializers = UserProfileSerializer(users,many = True) 
+        return Response (serializers.data, status=status.HTTP_200_OK)
+class RegisteredUserDetails(APIView): #user ko detail .,
+    def get(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+            serializers = UserProfileSerializer(user) 
+            return Response (serializers.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response(
+                {'error':'user not found'},status=status.HTTP_404_NOT_FOUND
+            )
 class LoginView(APIView):
     permission_classes = [AllowAny]
     

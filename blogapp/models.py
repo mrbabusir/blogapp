@@ -10,6 +10,7 @@ class Category(models.Model):
         return self.category_name
 
 class Blog(models.Model):
+    id = models.AutoField(primary_key=True,editable=False) ## not needed but gets conflick of id while praticing with mockaroo.
     title = models.CharField(max_length= 250) # title ko maximum length 250 rakheko
     category = models.ManyToManyField(Category,related_name='blogs') # category ko foreign key rakheko, related_name le blogs ko data lai category ma access garauna help garcha
     blogcontent = models.TextField()# blog ko content ko lagi text field rakheko textfield le unlimited length ko text store garna sakcha
@@ -19,6 +20,7 @@ class Blog(models.Model):
         return self.title
     
 class Comment(models.Model):
+    id = models.AutoField(primary_key=True,editable=False)
     post_id = models.ForeignKey(Blog,on_delete=models.CASCADE, related_name='comments') #related_name le comments ko data lai blog ma access garauna help garcha
     comment = models.TextField()
     user = models.ForeignKey(User,on_delete=models.CASCADE,db_column='user_id',related_name='comments') #postgresql ma user ko foreign key rakheko., related_name le comments ko data lai user ma access garauna help garcha

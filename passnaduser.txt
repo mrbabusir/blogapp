@@ -3,13 +3,13 @@
 
 user - super
 pass - 123654789sup
-phone - 9876543210
+phone - 9873216540
 email - yoyohoney@bee.com
 
 
 user - pravin
 pass - 12345678asdf
-phone - 9873216540
+phone - 9876543210
 email - shyamlal@bhailal.com
 
 user - msi
@@ -38,3 +38,17 @@ email - zillion@million.com
     "email":"",
     "password" : ""
 }
+
+best way to reset the sequence problem.--
+from django.db import connection
+
+with connection.cursor() as cursor:
+    cursor.execute("""
+        BEGIN;
+        -- Completely reset the sequence
+        ALTER SEQUENCE blogapp_comment_id_seq RESTART WITH 1;
+        SELECT setval('blogapp_comment_id_seq', 
+              (SELECT COALESCE(MAX(id), 1) FROM blogapp_comment), true);
+        COMMIT;
+    """)
+    print("Comment sequence completely rebuilt")

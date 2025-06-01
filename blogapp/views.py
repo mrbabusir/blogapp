@@ -20,7 +20,7 @@ from django.contrib.auth  import get_user_model
 from .permission import IsAuthorOrReadonly
 
 
-User = get_user_model() # get_user_model() le custom user model lai fetch garne kaam garchha    
+# User = get_user_model() # get_user_model() le custom user model lai fetch garne kaam garchha    
 
 # Create your views here.
 class PaginationView(PageNumberPagination): # pagination was not working in GenericAPIView so created a custom pagination view for esp in commentList view
@@ -62,6 +62,8 @@ class CategoryDetailView(GenericAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryDetailSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = PaginationView
+
     def get(self, request, pk):
         '''Retrieve a specific category by its ID.'''
         category = get_object_or_404(Category, pk=pk) # pk ko basis ma Category model ko objects fetch gareko
@@ -95,9 +97,12 @@ class BlogList(GenericAPIView):
         '''Create a new blog post.'''
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True) # serializer ko data validate garna parcha
+        blog = serializer.save(user=request.user) #blog ko instance create gareko without categories
+        if 'category' in request.data:
+            blog.category.set(request.data['category'])
         serializer.save(user=request.user) # user ko data save garna parcha
-        # permission_classes = [IsAuthenticated]
         return Response({"status": "published"}, status=status.HTTP_201_CREATED)
+    
 
 class BlogDetailView(GenericAPIView):
     '''BlogDetailView to handle retrieving, updating, and deleting a specific blog post.'''
@@ -147,18 +152,18 @@ class CommentList(GenericAPIView):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-    # def post(self, request):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save(user=request.user)
-    #     return Response(
-    #         {"status": "published"},
-    #         status=status.HTTP_201_CREATED
-    #     ) 
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response(
+            {"status": "published"},
+            status=status.HTTP_201_CREATED
+        ) 
 class CommentDetailView(GenericAPIView):
     queryset = Comment.objects.all() # get all comments
     serializer_class = CommentDetailSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadonly]
+    permission_classes = [ IsAuthorOrReadonly]
     def get(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
         serializer = self.get_serializer(comment)
@@ -180,7 +185,7 @@ class CommentDetailView(GenericAPIView):
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request,blog_pk, pk):
+    def delete(self, request, pk):
         comment = self.get_object()
         comment.delete()
         return Response(
